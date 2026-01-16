@@ -8,6 +8,7 @@ import { saveCard, getCards, deleteCard } from './services/storage';
 import { speak } from './services/audio';
 
 const App: React.FC = () => {
+  // Safe default states
   const [activeTab, setActiveTab] = useState<TabType>('Quick');
   const [input, setInput] = useState('');
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -16,11 +17,14 @@ const App: React.FC = () => {
   const [result, setResult] = useState<UpgradeResult | null>(null);
   const [history, setHistory] = useState<UpgradeResult[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    // Immediate content load
     setHistory(getCards());
+    setIsReady(true);
     
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (SpeechRecognition) {
@@ -38,7 +42,7 @@ const App: React.FC = () => {
       recognition.onerror = () => setIsRecording(false);
       recognitionRef.current = recognition;
     }
-  }, [activeTab]);
+  }, []);
 
   const handleUpgrade = async () => {
     if (!input.trim()) return;
@@ -51,7 +55,7 @@ const App: React.FC = () => {
       setHistory(getCards());
       setInput('');
     } catch (err) {
-      console.error(err);
+      console.error("Upgrade failed, but the UI is safe:", err);
     } finally {
       setIsUpgrading(false);
     }
@@ -154,79 +158,81 @@ const App: React.FC = () => {
     <Layout activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setResult(null); }}>
       <NotebookAccents />
       
-      {activeTab !== 'Archive' && (
-        <div className="animate-in fade-in duration-700">
-          <header className="mb-16 flex items-center justify-between">
-            <div>
-              <MinimalMark active={isUpgrading || isRecording} />
-              <h1 className="text-3xl font-hand mt-2 text-neutral-800">Doodle English</h1>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">v1.0.0</span>
-            </div>
-          </header>
-
-          <div className="relative mb-16">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={isRecording ? "Listening..." : "Say or type one thought..."}
-              className={`w-full h-40 bg-transparent text-xl font-hand focus:outline-none resize-none transition-all placeholder:text-neutral-300 ${isRecording ? 'opacity-40 translate-y-1' : 'opacity-100'}`}
-            />
-            
-            <div className="flex items-center justify-between mt-8">
-              <div className="flex items-center gap-6">
-                 <button 
-                  onClick={toggleRecording}
-                  className={`w-12 h-12 rounded-full sketch-border flex items-center justify-center transition-all tap-active ${isRecording ? 'bg-neutral-800 border-neutral-800' : 'bg-white hover:bg-neutral-50'}`}
-                >
-                  <div className={`w-2.5 h-2.5 rounded-full ${isRecording ? 'bg-white' : 'bg-neutral-800'}`} />
-                </button>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 font-hand">{isRecording ? 'Stop Recording' : 'Voice Input'}</span>
-              </div>
-
-              <button 
-                onClick={handleUpgrade} 
-                disabled={isUpgrading || !input.trim()} 
-                className={`px-6 py-2 sketch-border font-hand text-lg transition-all tap-active bg-white ${isUpgrading || !input.trim() ? 'opacity-30' : 'hover:shadow-md'}`}
-              >
-                {isUpgrading ? "Upgrading..." : "Next →"}
-              </button>
-            </div>
+      {/* Absolute Rendering: Always show header and debug info */}
+      <div className="animate-in fade-in duration-700">
+        <header className="mb-16 flex items-center justify-between">
+          <div>
+            <MinimalMark active={isUpgrading || isRecording} />
+            <h1 className="text-3xl font-hand mt-2 text-neutral-800">Doodle English</h1>
+            {isReady && (
+              <span className="text-[8px] uppercase tracking-widest text-neutral-300 bg-neutral-100 px-1 py-0.5 rounded ml-1">App loaded successfully</span>
+            )}
           </div>
+          <div className="text-right">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">v1.1.0</span>
+          </div>
+        </header>
 
-          {isUpgrading && (
-            <div className="space-y-12 animate-pulse mt-12">
-              <div className="skeleton h-32 rounded w-full" />
-              <div className="skeleton h-48 rounded w-full" />
+        {activeTab !== 'Archive' && (
+          <>
+            <div className="relative mb-16">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={isRecording ? "Listening..." : "Say or type one thought..."}
+                className={`w-full h-40 bg-transparent text-xl font-hand focus:outline-none resize-none transition-all placeholder:text-neutral-300 ${isRecording ? 'opacity-40 translate-y-1' : 'opacity-100'}`}
+              />
+              
+              <div className="flex items-center justify-between mt-8">
+                <div className="flex items-center gap-6">
+                   <button 
+                    onClick={toggleRecording}
+                    className={`w-12 h-12 rounded-full sketch-border flex items-center justify-center transition-all tap-active ${isRecording ? 'bg-neutral-800 border-neutral-800' : 'bg-white hover:bg-neutral-50'}`}
+                  >
+                    <div className={`w-2.5 h-2.5 rounded-full ${isRecording ? 'bg-white' : 'bg-neutral-800'}`} />
+                  </button>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 font-hand">{isRecording ? 'Stop Recording' : 'Voice Input'}</span>
+                </div>
+
+                <button 
+                  onClick={handleUpgrade} 
+                  disabled={isUpgrading || !input.trim()} 
+                  className={`px-6 py-2 sketch-border font-hand text-lg transition-all tap-active bg-white ${isUpgrading || !input.trim() ? 'opacity-30' : 'hover:shadow-md'}`}
+                >
+                  {isUpgrading ? "Upgrading..." : "Upgrade →"}
+                </button>
+              </div>
             </div>
-          )}
-          
-          {result && renderCard(result)}
 
-          {!result && !isUpgrading && (
-             <div className="mt-24 text-center opacity-20 py-12">
-                <p className="font-hand text-lg italic">"Clear thoughts, clear words."</p>
-             </div>
-          )}
-        </div>
-      )}
+            {isUpgrading && (
+              <div className="space-y-12 animate-pulse mt-12">
+                <div className="skeleton h-32 rounded w-full" />
+                <div className="skeleton h-48 rounded w-full" />
+              </div>
+            )}
+            
+            {result ? renderCard(result) : (
+              <div className="mt-24 text-center opacity-20 py-12 transition-opacity duration-700">
+                <p className="font-hand text-lg italic">"Think first, then speak."</p>
+                <p className="text-[10px] uppercase tracking-tighter mt-2">Enter a sentence to see it upgraded</p>
+              </div>
+            )}
+          </>
+        )}
 
-      {activeTab === 'Archive' && (
-        <div className="animate-in fade-in duration-500">
-          <header className="mb-16">
-             <h2 className="text-3xl font-hand">Saved Cards</h2>
-             <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-2">{history.length} items in archive</p>
-          </header>
-          {history.length === 0 ? (
-            <div className="py-24 text-center opacity-20">
-               <p className="font-hand text-xl">The archive is empty.</p>
-            </div>
-          ) : (
-            history.map(card => renderCard(card))
-          )}
-        </div>
-      )}
+        {activeTab === 'Archive' && (
+          <div className="animate-in fade-in duration-500">
+            <h2 className="text-3xl font-hand mb-12">History</h2>
+            {history.length === 0 ? (
+              <div className="py-24 text-center opacity-20">
+                <p className="font-hand text-xl">The archive is empty.</p>
+              </div>
+            ) : (
+              history.map(card => renderCard(card))
+            )}
+          </div>
+        )}
+      </div>
     </Layout>
   );
 };
