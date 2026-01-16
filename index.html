@@ -11,19 +11,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&family=Gochi+Hand&display=swap" rel="stylesheet">
     <style>
       :root {
         --paper: #fcfaf7;
         --ink: #1a1a1a;
-        --accent: #4a4a4a;
         --notebook-line: #e8e4e0;
       }
       body {
         font-family: 'Instrument Sans', sans-serif;
         background-color: var(--paper);
-        background-image: 
-          linear-gradient(var(--notebook-line) 1px, transparent 1px);
+        background-image: linear-gradient(var(--notebook-line) 1px, transparent 1px);
         background-size: 100% 2.5rem;
         color: var(--ink);
         -webkit-font-smoothing: antialiased;
@@ -43,15 +41,6 @@
         border-radius: 4px;
         position: relative;
       }
-      .card-paper::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        border: 1px solid rgba(0,0,0,0.05);
-        pointer-events: none;
-        transform: rotate(0.5deg);
-        z-index: -1;
-      }
       .skeleton {
         background: linear-gradient(90deg, #f0edea 25%, #f7f5f2 50%, #f0edea 75%);
         background-size: 200% 100%;
@@ -63,10 +52,13 @@
       }
       ::-webkit-scrollbar { display: none; }
       html { scrollbar-width: none; -ms-overflow-style: none; }
-      
       .tap-active:active {
         transform: scale(0.98);
         opacity: 0.8;
+      }
+      .bg-grid {
+        background-image: radial-gradient(var(--notebook-line) 1px, transparent 1px);
+        background-size: 20px 20px;
       }
     </style>
     <script type="importmap">

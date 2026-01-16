@@ -1,26 +1,34 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { UpgradeResult } from "../types";
+import { getMockUpgrade } from "./mock";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export async function upgradeEnglish(input: string): Promise<UpgradeResult> {
+  if (!process.env.API_KEY || process.env.API_KEY === 'YOUR_API_KEY') {
+    console.warn("API Key missing, using mock data.");
+    return getMockUpgrade(input);
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Input: "${input}"`,
+      contents: `User Input Idea: "${input}"`,
       config: {
-        systemInstruction: `You are an editorial English consultant.
-        Objective: Transform user ideas (Chinese or English) into high-quality, clear communications.
+        systemInstruction: `You are an editorial English consultant. 
+        Transform user ideas into three high-quality versions (Clear, Business, IELTS).
         
-        1. "AcknowledgedMeaning": Simple, warm Chinese validation.
-        2. "Clear": Most natural, direct English version.
-        3. "Business": Professional, polite, suitable for Slack/Email.
-        4. "IELTS": Band 7.5+ style, using sophisticated cohesion and vocabulary.
-        5. "Patterns": 2 key reusable structural formulas.
-        6. "FeynmanChallenge": A brief prompt asking the user to synthesize what they learned.
+        Rules:
+        1. "acknowledgedMeaning": Warm Chinese validation of the core idea.
+        2. "clear": Natural, direct English.
+        3. "business": Professional, polite, suitable for work context.
+        4. "ielts": Band 7.5+ style (sophisticated vocab and cohesion).
+        5. "patterns": 2-3 Structural Patterns (reusable thinking structures). 
+           - Each pattern MUST have a "title", a "template" (reusable phrase), and a "note" (one-line Chinese usage guide).
+        6. "feynmanChallenge": A brief prompt asking the user to re-express the idea simply.
 
-        Respond strictly in JSON.`,
+        Return strictly JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -29,7 +37,18 @@ export async function upgradeEnglish(input: string): Promise<UpgradeResult> {
             clear: { type: Type.STRING },
             business: { type: Type.STRING },
             ielts: { type: Type.STRING },
-            patterns: { type: Type.ARRAY, items: { type: Type.STRING } },
+            patterns: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  template: { type: Type.STRING },
+                  note: { type: Type.STRING }
+                },
+                required: ["title", "template", "note"]
+              }
+            },
             feynmanChallenge: { type: Type.STRING }
           },
           required: ["acknowledgedMeaning", "clear", "business", "ielts", "patterns", "feynmanChallenge"]
@@ -37,7 +56,10 @@ export async function upgradeEnglish(input: string): Promise<UpgradeResult> {
       }
     });
 
-    const data = JSON.parse(response.text.trim());
+    const text = response.text;
+    if (!text) throw new Error("Empty response from Gemini");
+    
+    const data = JSON.parse(text.trim());
     return {
       ...data,
       id: crypto.randomUUID(),
@@ -46,6 +68,6 @@ export async function upgradeEnglish(input: string): Promise<UpgradeResult> {
     };
   } catch (error) {
     console.error("Gemini Error:", error);
-    throw error;
+    return getMockUpgrade(input);
   }
 }

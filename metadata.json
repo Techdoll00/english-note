@@ -1,7 +1,12 @@
 {
   "name": "Doodle English",
-  "description": "A calm, doodle-style English learning companion for native Chinese speakers, focusing on Business and IELTS communication through the Feynman method.",
+  "short_name": "Doodle",
+  "description": "A calm, professional English upgrade tool using the Feynman method.",
   "requestFramePermissions": [
     "microphone"
-  ]
+  ],
+  "theme_color": "#fcfaf7",
+  "background_color": "#fcfaf7",
+  "display": "standalone",
+  "start_url": "/"
 }
