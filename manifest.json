@@ -1,0 +1,16 @@
+
+{
+  "name": "Doodle English",
+  "short_name": "Doodle",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f5",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

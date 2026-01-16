@@ -1,0 +1,7 @@
+{
+  "name": "Doodle English",
+  "description": "A calm, doodle-style English learning companion for native Chinese speakers, focusing on Business and IELTS communication through the Feynman method.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
